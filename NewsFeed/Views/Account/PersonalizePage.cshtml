@@ -1,0 +1,39 @@
+﻿@model List<NewsFeed.Models.Category>
+<h3>Välkommen till din personliga nyhetssida!</h3>
+
+<p>Här har du möjlighet att välja vilken typ av nyheter du vill ska visas i ditt flöde</p>
+
+@using (Html.BeginForm("PersonalizePage", "Account", FormMethod.Post))
+{
+    <h4>Vilken typ av nyheter är du intresserad av?</h4>
+    <table>
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td>
+                    @Html.RadioButton("Category", m.Id, m.IsSelected, new { @id = m.Id })
+                </td>
+                <td>
+                    @Html.Label(m.Name, new { @for = m.Id })
+                </td>
+            </tr>
+        }
+    </table>
+    <br />
+    @Html.Hidden("categoryId", 1, new { @id = "categoryId" });
+    <input type="submit" value="Save" />
+}
+
+<script>
+    window.onload = function () {
+        var selectedCategoryIdElement = document.getElementById("categoryId");
+        var radiobuttons = document.querySelectorAll("input[type=radio]");
+
+        for (var i = 0; i < radiobuttons.length; i++) {
+            radiobuttons[i].checked = false;
+            radiobuttons[i].addEventListener("click", function (e) {
+                selectedCategoryIdElement.value = this.value;
+            });
+        }
+    }
+</script>

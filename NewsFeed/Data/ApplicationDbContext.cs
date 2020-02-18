@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNet.Identity.EntityFramework;
 using NewsFeed.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System.Data.Entity;
 
 namespace NewsFeed.Data
 {
@@ -13,10 +10,11 @@ namespace NewsFeed.Data
             : base("DefaultConnection", throwIfV1Schema: false)
         {
         }
-
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();
         }
+
+        public DbSet<Category> Categories { get; set; }
     }
 }

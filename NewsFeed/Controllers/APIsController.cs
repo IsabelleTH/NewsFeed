@@ -9,6 +9,13 @@ namespace NewsFeed.Controllers
 {
     public class APIsController : Controller
     {
+        public ActionResult GetByCategory(string categoryName)
+        {
+            NewsAPIClient client = new NewsAPIClient("28d99b9a350f48d09c93459a32d4fa36");
+            var articles = client.GetArticles(categoryName);
+            return View(articles);
+        }
+
         public ActionResult Nyheter()
         {
             NewsAPIClient client = new NewsAPIClient("28d99b9a350f48d09c93459a32d4fa36");

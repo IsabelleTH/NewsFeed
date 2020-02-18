@@ -185,6 +185,7 @@
     <Compile Include="Models\ApplicationUser.cs" />
     <Compile Include="Models\Article.cs" />
     <Compile Include="Models\ArticleSource.cs" />
+    <Compile Include="Models\CategoryModel.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\NewsAPIClient.cs" />
@@ -245,6 +246,8 @@
     <Content Include="Views\APIs\Technology.cshtml" />
     <Content Include="Views\APIs\General.cshtml" />
     <Content Include="Views\Home\StartUp.cshtml" />
+    <Content Include="Views\Account\PersonalizePage.cshtml" />
+    <Content Include="Views\APIs\GetByCategory.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

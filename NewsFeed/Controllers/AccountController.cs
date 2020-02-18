@@ -1,15 +1,19 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Data.Entity.Validation;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
+using NewsFeed.Data;
 using NewsFeed.Models;
 
 namespace NewsFeed.Controllers
 {
-    [Authorize]
     public class AccountController : Controller
     {
         private ApplicationSignInManager _signInManager;
@@ -19,7 +23,7 @@ namespace NewsFeed.Controllers
         {
         }
 
-        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
+        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
         {
             UserManager = userManager;
             SignInManager = signInManager;
@@ -31,9 +35,9 @@ namespace NewsFeed.Controllers
             {
                 return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
             }
-            private set 
-            { 
-                _signInManager = value; 
+            private set
+            {
+                _signInManager = value;
             }
         }
 
@@ -84,11 +88,11 @@ namespace NewsFeed.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("GetUserCategoryNews", "Account");
                 case SignInStatus.LockedOut:
                     return View("Lockout");
                 case SignInStatus.RequiresVerification:
-                    return RedirectToAction("SendCode", new { /*ReturnUrl = returnUrl,*/ RememberMe = model.RememberMe });
+                    return RedirectToAction("SendCode", new { RememberMe = model.RememberMe });
                 case SignInStatus.Failure:
                 default:
                     ModelState.AddModelError("", "Invalid login attempt.");
@@ -124,23 +128,49 @@ namespace NewsFeed.Controllers
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
-                    return RedirectToAction("Index", "Home");
-                }
+                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
+                    return RedirectToAction("PersonalizePage", "Account");
+                }
 
                 AddErrors(result);
             }
-
             // If we got this far, something failed, redisplay form
             return View(model);
         }
 
-        public ActionResult PersonalizePage ()
+
+        public ActionResult PersonalizePage()
         {
-            return View();
+            var dbContext = HttpContext.GetOwinContext().Get<ApplicationDbContext>();
+
+            var model = dbContext.Categories.ToList();
+
+            return View(model);
         }
+
+        public ActionResult GetUserCategoryNews ()
+        {
+            var id = User.Identity.GetUserId();
+            var dbContext = HttpContext.GetOwinContext().Get<ApplicationDbContext>();
+            var user = dbContext.Users.FirstOrDefault(m => m.Id == id);
+            var categoryId = user.CategoryId;
+            var category = dbContext.Categories.FirstOrDefault(m => m.Id == categoryId);
+            return Redirect("/apis/" + category.Name);
+        }
+        
+        [HttpPost]
+        public ActionResult PersonalizePage(int categoryId)
+        {
+            var id = User.Identity.GetUserId();
+            var dbContext = HttpContext.GetOwinContext().Get<ApplicationDbContext>();
+            var user = dbContext.Users.FirstOrDefault(m => m.Id == id);
+            user.CategoryId = categoryId;
+            dbContext.SaveChanges();
+            var category = dbContext.Categories.FirstOrDefault(m => m.Id == categoryId);
+            return Redirect("/apis/" + category.Name);
+        }
+
 
         // POST: /Account/LogOff
         [HttpPost]
@@ -161,7 +191,7 @@ namespace NewsFeed.Controllers
         }
 
         [AllowAnonymous]
-        public string GetAftonbladet ()
+        public string GetAftonbladet()
         {
             var client = new WebClient();
 
@@ -169,3 +199,4 @@ namespace NewsFeed.Controllers
         }
     }
 }
+
